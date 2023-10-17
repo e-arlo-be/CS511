@@ -10,6 +10,35 @@ import Library.Tactic.Addarith
 import Library.Tactic.Cancel
 import Library.Tactic.Use
 
+def Tribalanced (x : ℝ) : Prop := ∀ n : ℕ, (1 + x / n) ^ n < 3
+
+def Superpowered (k : ℕ) : Prop := ∀ n : ℕ, Prime (k ^ k ^ n + 1)
+
+theorem not_superpowered_zero : ¬ Superpowered 0 := by
+  intro h
+  have one_prime : Prime (0 ^ 0 ^ 0 + 1) := h 0
+  conv at one_prime => numbers -- simplifies that statement to `Prime 1`
+  have : ¬ Prime 1 := not_prime_one
+  contradiction
+
+theorem superpowered_one : Superpowered 1 := by
+  intro n
+  conv => ring_nf -- simplifies goal from `Prime (1 ^ 1 ^ n + 1)` to `Prime 2`
+  apply prime_two
+
+theorem not_superpowered_three : ¬ Superpowered 3 := by
+  intro h
+  dsimp [Superpowered] at h
+  have four_prime : Prime (3 ^ 3 ^ 0 + 1) := h 0
+  conv at four_prime => numbers -- simplifies that statement to `Prime 4`
+  have four_not_prime : ¬ Prime 4
+  · apply not_prime 2 2
+    · numbers -- show `2 ≠ 1`
+    · numbers -- show `2 ≠ 4`
+    · numbers -- show `4 = 2 * 2`
+  contradiction
+
+
 /-4a-/
 example {P Q : α → Prop} (h : ∀ x, P x ↔ Q x) : (∃ x, P x) ↔ (∃ x, Q x) := by
   constructor
@@ -68,31 +97,44 @@ example (P : α → Prop) (Q : Prop) : ((∃ x, P x) ∧ Q) ↔ ∃ x, (P x ∧ 
       exact hx
     · exact hq
 
+/-5a-/
+example : ∃ x : ℝ, Tribalanced x ∧ ¬ Tribalanced (x + 1) := by 
+  by_cases h : Tribalanced 1
+  · use 1
+    constructor
+    · exact h
+    · intro h1
+      dsimp [Tribalanced] at h1
+      specialize h1 1
+      simp at h1
+      numbers at h1
+  · use 0
+    constructor
+    · dsimp [Tribalanced]
+      simp
+      numbers
+    · intro h0
+      simp at h0
+      exact h h0
 
-    
-    
-
+      
   
-    
 
 
+      
+      
 
-
-example {P : α → β → Prop} (h : ∃ x : α, ∀ y : β, P x y) :
-    ∀ y : β, ∃ x : α, P x y := by
-  obtain ⟨x, hx⟩ := h
-  intro y
-  use x
-  apply hx
-
-example (P : α → Prop) : ¬ (∃ x, P x) ↔ ∀ x, ¬ P x := by
-  constructor
-  · intro h a ha
-    have : ∃ x, P x
-    · use a
-      apply ha
-    contradiction
-  · intro h h'
-    obtain ⟨x, hx⟩ := h'
-    have : ¬ P x := h x
-    contradiction
+example : ∃ k : ℕ, Superpowered k ∧ ¬ Superpowered (k + 1) := by
+  by_cases h2 : Superpowered 2
+  · use 2
+    constructor
+    · apply h2
+    · apply not_superpowered_three
+  · use 1
+    constructor
+    · apply superpowered_one
+    · apply h2
+  
+      
+      
+  
