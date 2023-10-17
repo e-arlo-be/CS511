@@ -117,23 +117,21 @@ example : ∃ x : ℝ, Tribalanced x ∧ ¬ Tribalanced (x + 1) := by
       simp at h0
       exact h h0
 
-      
-  
-
-
-      
-      
-
+/-5b-/
 example : ∃ k : ℕ, Superpowered k ∧ ¬ Superpowered (k + 1) := by
-  by_cases h2 : Superpowered 2
-  · use 2
-    constructor
-    · apply h2
-    · apply not_superpowered_three
-  · use 1
-    constructor
-    · apply superpowered_one
-    · apply h2
+  use 1
+  constructor
+  · exact superpowered_one
+  · intro h1
+    dsimp [Superpowered] at h1
+    specialize h1 5
+    numbers at h1
+    have : ¬ Prime 4294967297 := by
+      apply not_prime 641 6700417
+      · numbers
+      · numbers
+      · numbers
+    contradiction
   
       
       
