@@ -2,7 +2,6 @@ import Mathlib.Data.Real.Basic
 import Library.Theory.Parity
 import Library.Theory.Comparison
 import Library.Theory.Prime
-import Library.Tactic.Rel
 import Mathlib.Tactic.Set
 import Mathlib.Tactic.IntervalCases
 import Library.Tactic.Induction
@@ -122,6 +121,16 @@ theorem problem4a (n : ℤ) : T n = n ^ 2 := by
     numbers
   termination_by _ n => 3 * n - 1
 
+/-6.6.5 from Mechanics of Proof-/
+theorem example665 (a b : ℤ) (h : 0 < b) : 0 ≤ fmod a b ∧ fmod a b < b ∧ a ≡ fmod a b [ZMOD b] := by
+  constructor
+  · apply fmod_nonneg_of_pos a h
+  constructor
+  · apply fmod_lt_of_pos a h
+  · use fdiv a b
+    have Hab : fmod a b + b * fdiv a b = a := fmod_add_fdiv a b
+    addarith [Hab]
+
 /- Hint:  prove uniqueness, then use it to prove problem4b -/
 theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
     (hr : 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b])
@@ -130,45 +139,39 @@ theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
   obtain ⟨hs1, hs2, hs3⟩ := hs
   obtain ⟨x, hx⟩ := hr3
   obtain ⟨y, hy⟩ := hs3
-  have hbx : b * x + r = a := by addarith [hx]
-  have hby : b * y + s = a := by addarith [hy]
-  have heq : b * x + r = b * y + s := by rw [hbx, hby]
-  have h1 : r - s = b * (y - x) := by
+  have hxm1 : b * y > b * (x - 1) := by
     calc
-      r - s = b * y - b * x := by addarith [heq]
-      _ = b * (y - x) := by ring
-  have h2 : (r - s) < b := by addarith [h, hr1, hs1, hr2, hs2]
-  have h3 : r - s > -b := by addarith [h, hr1, hs1, hr2, hs2]
-  have hdvd : b ∣ (r - s) := ⟨y - x, h1⟩
-  have h3' : -b < r - s := by addarith [h3]
-  have h4 : -b < r - s ∧ r - s < b := ⟨h3', h2⟩
-  have habs : abs (r - s) < b ↔ -b < r - s ∧ r - s < b := abs_lt
-  have habs' : -b < r - s ∧ r - s < b ↔ abs (r - s) < b := by rw [habs]
-  have hzero : r - s = 0 := by
-    rw [h1] at habs'
-
-
-
-
-
-
-
-
-
-/-
-  have hrs : r = s := by
+      b * y = a - s := by rw [hy]
+      _ > a - b := by rel [hs2]
+      _ = (a - r) + r - b := by ring
+      _ = (b * x) + r - b := by rw [hx]
+      _ ≥ (b * x) - b := by extra
+      _ = b * (x - 1) := by ring
+  have hxp1 : b * y < b * (x + 1) := by
     calc
-      r = s := by ring [h_zero]
--/
-
-
-/-
+      b * y = a - s := by rw [hy]
+      _ ≤ a := by addarith [hs1]
+      _ < (a - r) + b := by addarith [hr2]
+      _ = (b * x) + b := by rw [hx]
+      _ = b * (x + 1) := by ring
+  cancel b at hxm1
+  cancel b at hxp1
+  have heq : x = y := by addarith [hxm1, hxp1]
+  rw [heq] at hx
+  addarith [hx, hy]
 
 /- 5 points -/
 theorem problem4b (a b : ℤ) (h : 0 < b) : ∃! r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b] := by
-  sorry
+  use fmod a b
+  constructor
+  · apply example665
+    apply h
+  · intro y
+    intro h1
+    have hab := example665 a b h
+    have unique := uniqueness a b h (hab) h1
+    rw [unique]
 
-/-
 @[decreasing] theorem lower_bound_fmod1 (a b : ℤ) (h1 : 0 < b) : -b < fmod a b := by
   have H : 0 ≤ fmod a b
   · apply fmod_nonneg_of_pos
@@ -212,29 +215,54 @@ theorem problem5a (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
     obtain ⟨IH_right, IH_left⟩ := IH
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      apply IH_left
     · -- prove that `gcd a b ∣ a`
-      sorry
+      obtain ⟨k, hk⟩ := IH_left
+      obtain ⟨l, hl⟩ := IH_right
+      have H : fmod a b + b * fdiv a b = a := fmod_add_fdiv a b
+      set q := fdiv a b
+      set r := fmod a b
+      use l + k * q
+      calc
+        a = r + b * q := by rw [H]
+        _ = gcd b r * l + (gcd b r * k) * q := by rw [← hk, ← hl]
+        _ = gcd b r * (l + k * q) := by ring
   · -- case `b < 0`
     have IH : _ ∧ _ := problem5a b (fmod a (-b)) -- inductive hypothesis
     obtain ⟨IH_right, IH_left⟩ := IH
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      apply IH_left
     · -- prove that `gcd a b ∣ a`
-      sorry
+      obtain ⟨k, hk⟩ := IH_left
+      obtain ⟨l, hl⟩ := IH_right
+      use (l - k * fdiv a (-b))
+      have h1: a = gcd b (fmod a (-b)) * (l - k * fdiv a (-b)) := by
+        calc
+          a = fmod a (-b) + (-b) * fdiv a (-b) := by rw[fmod_add_fdiv a (-b)]
+          _ = gcd b (fmod a (-b)) * l + (-b) * fdiv a (-b) := by rw[← hl]
+          _ = gcd b (fmod a (-b)) * l - b * fdiv a (-b) := by ring
+          _ = gcd b (fmod a (-b)) * l - gcd b (fmod a (-b)) * k * fdiv a (-b) := by rw[← hk]
+          _ = gcd b (fmod a (-b)) * (l - k * fdiv a (-b)) := by ring
+      exact h1
   · -- case `b = 0`, `0 ≤ a`
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      interval_cases b
+      . use 0
+        ring
     · -- prove that `gcd a b ∣ a`
-      sorry
+      · use 1
+        ring
   · -- case `b = 0`, `a < 0`
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      interval_cases b
+      . use 0
+        ring
     · -- prove that `gcd a b ∣ a`
-      sorry
+      · use -1
+        ring
 termination_by problem5a a b => b
 
 mutual
@@ -300,6 +328,14 @@ theorem bezout (a b : ℤ) : ∃ x y : ℤ, x * a + y * b = gcd a b := by
 
 /- 5 points -/
 theorem problem5b {d a b : ℤ} (ha : d ∣ a) (hb : d ∣ b) : d ∣ gcd a b := by
-  sorry
--/
--/
+  obtain ⟨t, ht⟩ := bezout a b
+  obtain ⟨k, htk⟩ := ht
+  have h1: d ∣ gcd a b := by
+    obtain ⟨m, ha⟩ := ha
+    obtain ⟨n, hb⟩ := hb
+    use (t * m + k * n)
+    calc
+      gcd a b = t * a + k * b := by rw[htk]
+      _ = t * (d * m) + k * (d * n) := by rw[ha, hb]
+      _ = d * (t * m + k * n) := by ring
+  apply h1
