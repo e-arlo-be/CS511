@@ -92,27 +92,58 @@ theorem problem4d {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
       use i x
       rw [hi, hx]
 
-/-
+
 /- 2 points -/
 theorem problem5a : Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
-  sorry
+  dsimp [Bijective, Injective, Surjective]
+  constructor
+  ·
+    intro x y hxy
+    simp at hxy
+    exact hxy
+  ·
+    intro y
+    use (4 - y) / 3
+    calc
+      4 - 3 * ((4 - y) / 3) = 4 - (4 - y) := by ring
+      _ = y := by ring
 
 /- 2 points -/
 theorem problem5b : ¬ Bijective (fun (x : ℝ) ↦ x ^ 2 + 2 * x) := by
-  sorry
+  dsimp [Bijective, Injective, Surjective]
+  push_neg
+  constructor
+  · use -4
+    use 2
+    constructor
+    ·numbers
+    ·numbers
+
 
 def Inverse (f : X → Y) (g : Y → X) : Prop := g ∘ f = id ∧ f ∘ g = id
 
 def u (x : ℝ) : ℝ := 5 * x + 1
 
-noncomputable def v (x : ℝ) : ℝ := sorry
+noncomputable def v (x : ℝ) : ℝ := (x - 1) / 5
 
 /- 3 points -/
 theorem problem5c : Inverse u v := by
-  sorry
+  dsimp [Inverse]
+  constructor
+  ·
+    ext x
+    simp [u, v]
+    ring
+  ·
+    ext x
+    simp [u, v]
+    ring
 
 /- 3 points -/
 theorem problem5d {f : X → Y} (hf : Injective f) {g : Y → Z} (hg : Injective g) :
     Injective (g ∘ f) := by
-  sorry
--/
+  dsimp [Injective] at *
+  intro x y hxy
+  have hfxfy := hg hxy
+  have hfx := hf hfxfy
+  exact hfx
