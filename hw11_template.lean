@@ -50,19 +50,49 @@ theorem problem4a : ¬ ∀ (f : ℤ → ℤ), Surjective f → Surjective (fun x
 
 /- 2 points -/
 theorem problem4b : ¬ ∀ c : ℝ, Surjective (fun x ↦ c * x) := by
-  sorry
+  dsimp [Surjective]
+  push_neg
+  use 0 -- c = 0
+  use 1 -- b = 1
+  simp
 
 
-/-
 /- 3 points -/
 theorem problem4c {f : ℚ → ℚ} (hf : ∀ x y, x < y → f x < f y) : Injective f := by
-  sorry
+  dsimp [Injective]
+  intros x y hxy
+  have hrel := lt_trichotomy x y
+  cases hrel with
+  | inl xlt =>
+    have hfxlt := hf x y xlt
+    rw [hxy] at hfxlt
+    simp at hfxlt
+  | inr lteq =>
+    cases lteq with
+    | inl xeqy =>
+      rw [xeqy]
+    | inr ylt =>
+      have hfylt := hf y x ylt
+      rw [hxy] at hfylt
+      simp at hfylt
+
 
 /- 3 points -/
 theorem problem4d {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
     (hi : ∀ x, f (i x) = f x + 1) : Surjective f := by
-  sorry
+  dsimp [Surjective]
+  intro n
+  simple_induction n with k IH
+  · -- n = 0
+    use x0
+    exact h0
+  · -- n = k + 1
+    cases IH with
+    | intro x hx =>
+      use i x
+      rw [hi, hx]
 
+/-
 /- 2 points -/
 theorem problem5a : Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
   sorry
