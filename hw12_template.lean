@@ -71,59 +71,42 @@ theorem problem4d {f : X → Y} {g1 g2 : Y → X} (h1 : Inverse f g1) (h2 : Inve
       _ = (g1 ∘ f) (g2 x) := by rfl
       _ = g2 x := by rw [hg1f]
   rw [hwe]
-  
 
 
-
-
-
-
-/-
-      _ = g2 ((f ∘ g2) ((f ∘ g2) x)) := by rw [←hg1f, ←hg2f]
-      _ = g2 ((f ∘ g2) ((f ∘ g2) x)) := by rw [←hg1x, ←hg2x, ←heq]
-      _ = g2 x := by rw [←hg2x]
--/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/-
 /- 1 points -/
 theorem problem5a1 : ¬ Injective (fun ((x, y) : ℤ × ℤ) ↦ x - 2 * y - 1) := by
-  sorry
+  dsimp [Injective] at *
+  push_neg
+  use (5, 1)
+  use (7, 2)
+  simp
 
 /- 1 points -/
 theorem problem5a2 : Surjective (fun ((x, y) : ℤ × ℤ) ↦ x - 2 * y - 1) := by
-  sorry
+  dsimp [Surjective] at *
+  intro z
+  use (z + 1, 0)
+  simp
 
 /- 2 points -/
 theorem problem5b : ¬ Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 + y ^ 2) := by
-  sorry
+  dsimp [Surjective] at *
+  push_neg
+  use -1
+  intro h
+  have h1: h.fst ^ 2 + h.snd ^ 2 > -1 := by
+    calc
+      h.fst ^ 2 + h.snd ^ 2 = h.fst ^ 2 + h.snd ^ 2 := by ring
+      _ ≥ 0 := by extra
+      _ > -1 := by numbers
+  apply ne_of_gt h1
 
+
+
+
+
+
+/-
 /- 3 points -/
 theorem problem5c : ¬ Injective
     (fun ((x, y, z) : ℝ × ℝ × ℝ) ↦ (x + y + z, x + 2 * y + 3 * z)) := by
