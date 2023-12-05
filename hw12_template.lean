@@ -101,18 +101,32 @@ theorem problem5b : ¬ Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 + y ^ 2) 
       _ > -1 := by numbers
   apply ne_of_gt h1
 
-
-
-
-
-
-/-
 /- 3 points -/
 theorem problem5c : ¬ Injective
     (fun ((x, y, z) : ℝ × ℝ × ℝ) ↦ (x + y + z, x + 2 * y + 3 * z)) := by
-  sorry
+  dsimp [Injective] at *
+  push_neg
+  use (0,1,0), (1,-1,1)
+  numbers
+  simp
 
 /- 3 points -/
 theorem problem5d : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x + 2 * y, x + 3 * y)) := by
-  sorry
--/
+  dsimp [Injective] at *
+  intro w z h
+  obtain ⟨h1, h2, h3⟩ := h
+  have h2' : (w.fst + w.snd) + w.snd = (z.fst + z.snd) + z.snd := by
+    calc
+      (w.fst + w.snd) + w.snd = w.fst + 2 * w.snd := by ring
+      _ = (z.fst + 2 * z.snd) := by rw [h2]
+      _ = (z.fst + z.snd) + z.snd := by ring
+  rw [h1] at h2'
+  simp at h2'
+  have h3 : w.fst = z.fst := by
+    calc
+      w.fst = z.fst + z.snd - w.snd := by addarith [h1]
+      _ = z.fst + z.snd - z.snd := by rw [h2']
+      _ = z.fst := by ring
+  constructor
+  exact h3
+  exact h2'
