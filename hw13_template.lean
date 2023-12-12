@@ -98,14 +98,27 @@ theorem problem5a : {r : ℤ | r ≡ 7 [ZMOD 10] }
       _ = 10 * k + 5 := by rw [hk]
       _ = 5 * (2 * k + 1) := by ring
 
-
-/-
 /- 3 points -/
 theorem problem5b : {n : ℤ | 5 ∣ n} ∩ {n : ℤ | 8 ∣ n} ⊆ {n : ℤ | 40 ∣ n} := by
-  sorry
+  dsimp [Set.subset_def]
+  intro x hx
+  obtain ⟨h5, h8⟩ := hx
+  obtain ⟨k, hk⟩ := h5
+  obtain ⟨l, hl⟩ := h8
+  use (-3 * l + 2 * k)
+  calc
+    x = -15 * x + 16 * x := by ring
+    _ = -15 * (8 * l) + 16 * x := by rw [hl]
+    _ = -15 * (8 * l) + 16 * (5 * k) := by rw [hk]
+    _ = 40 * (-3 * l + 2 * k) := by ring
 
 /- 4 points -/
 theorem problem5c :
     {n : ℤ | 3 ∣ n} ∪ {n : ℤ | 2 ∣ n} ⊆ {n : ℤ | n ^ 2 ≡ 1 [ZMOD 6]}ᶜ := by
-  sorry
--/
+  dsimp [Set.subset_def]
+  intro x hx
+  obtain (h3 | h2) := hx
+  · intro h
+    obtain ⟨k, hk⟩ := h
+    obtain ⟨l, hl⟩ := h3
+    
